@@ -1,3 +1,5 @@
+import Link from 'next/link';
+
 export default function Home() {
   return (
     <main className="min-h-screen flex flex-col items-center justify-center gap-8">
@@ -9,9 +11,12 @@ export default function Home() {
           Build DJ sets powered by Spotify data
         </p>
       </div>
-      <button className="px-8 py-3 rounded-full bg-gradient-to-r from-coral to-rose text-white font-semibold text-lg hover:scale-105 transition-transform shadow-lg shadow-rose/20">
+      <Link
+        href="/api/auth/spotify"
+        className="px-8 py-3 rounded-full bg-gradient-to-r from-coral to-rose text-white font-semibold text-lg hover:scale-105 transition-transform shadow-lg shadow-rose/20"
+      >
         Login with Spotify
-      </button>
+      </Link>
     </main>
   );
 }
