@@ -10,16 +10,25 @@ export interface TrackRowData {
   artist: string;
   bpm: number;
   camelot: string;
-  emoji: string;
-  gradientFrom: string;
-  gradientTo: string;
+  energy: number;
+  albumArt?: string;
+  emoji?: string;
+  gradientFrom?: string;
+  gradientTo?: string;
   durationMs: number;
+  uri?: string;
 }
 
 interface TrackRowProps {
   track: TrackRowData;
   index: number;
   onRemove?: (id: string) => void;
+}
+
+function energyColor(energy: number): string {
+  if (energy < 0.33) return '#34D399';
+  if (energy < 0.66) return '#E8A854';
+  return '#FF6B35';
 }
 
 export default function TrackRow({ track, index, onRemove }: TrackRowProps) {
@@ -65,14 +74,28 @@ export default function TrackRow({ track, index, onRemove }: TrackRowProps) {
         {index + 1}
       </span>
 
-      {/* Album art placeholder */}
-      <div
-        className="w-11 h-11 rounded-lg flex items-center justify-center text-lg flex-shrink-0"
-        style={{
-          background: `linear-gradient(135deg, ${track.gradientFrom}, ${track.gradientTo})`,
-        }}
-      >
-        {track.emoji}
+      {/* Album art */}
+      <div className="relative w-11 h-11 rounded-lg flex-shrink-0 overflow-hidden">
+        {track.albumArt ? (
+          <img src={track.albumArt} alt="" className="w-full h-full object-cover" />
+        ) : (
+          <div
+            className="w-full h-full flex items-center justify-center text-lg"
+            style={{
+              background: `linear-gradient(135deg, ${track.gradientFrom || '#6B2D7B'}, ${track.gradientTo || '#C664A0'})`,
+            }}
+          >
+            {track.emoji || '🎵'}
+          </div>
+        )}
+        {/* Energy bar */}
+        <div
+          className="absolute bottom-0 left-0 h-[3px] rounded-b-lg"
+          style={{
+            width: `${(track.energy ?? 0.5) * 100}%`,
+            backgroundColor: energyColor(track.energy ?? 0.5),
+          }}
+        />
       </div>
 
       {/* Title + Artist */}
@@ -87,7 +110,7 @@ export default function TrackRow({ track, index, onRemove }: TrackRowProps) {
         <p className="text-mauve text-xs">{track.camelot}</p>
       </div>
 
-      {/* Delete button (long press) */}
+      {/* Delete button */}
       {showDelete && (
         <button
           onClick={() => onRemove?.(track.id)}

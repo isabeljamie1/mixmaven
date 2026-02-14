@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Inter, DM_Serif_Display } from "next/font/google";
 import "./globals.css";
 
@@ -10,8 +10,26 @@ const dmSerif = DM_Serif_Display({
 });
 
 export const metadata: Metadata = {
-  title: "MixMaven — DJ Set Builder",
-  description: "Build DJ sets and mixes using Spotify data",
+  title: "MixMaven — Build DJ Sets with Spotify",
+  description:
+    "Build harmonic DJ sets, preview transitions, and share mixes — powered by Spotify.",
+  icons: {
+    icon: "/favicon.ico",
+    apple: "/favicon.ico",
+  },
+  openGraph: {
+    title: "MixMaven — Build DJ Sets with Spotify",
+    description: "Build harmonic DJ sets, preview transitions, and share mixes.",
+    type: "website",
+  },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#1a1a1a",
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  viewportFit: "cover",
 };
 
 export default function RootLayout({
