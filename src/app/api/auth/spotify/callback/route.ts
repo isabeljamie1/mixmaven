@@ -88,12 +88,6 @@ export async function GET(request: NextRequest) {
       }).eq('id', profileId);
     }
 
-    // Sign in as this user by generating a session
-    const { data: signInData, error: signInError } = await supabase.auth.admin.generateLink({
-      type: 'magiclink',
-      email: `${spotifyUser.id}@spotify.mixmaven.local`,
-    });
-
     // Redirect to the mix builder with spotify data stored
     const response = NextResponse.redirect(new URL('/mix/demo', origin));
     response.cookies.delete('spotify_auth_state');
