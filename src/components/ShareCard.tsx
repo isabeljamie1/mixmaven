@@ -1,9 +1,12 @@
 'use client';
 
+import Image from 'next/image';
+
 interface ShareCardTrack {
   emoji: string;
   gradientFrom: string;
   gradientTo: string;
+  albumArt?: string;
 }
 
 interface ShareCardProps {
@@ -29,9 +32,7 @@ export default function ShareCard({
 }: ShareCardProps) {
   return (
     <div className="relative overflow-hidden rounded-2xl border border-neutral-800">
-      {/* Dark base with coral + mauve radial gradients */}
       <div className="relative bg-card p-6">
-        {/* Gradient overlays */}
         <div
           className="absolute inset-0 pointer-events-none"
           style={{
@@ -41,17 +42,14 @@ export default function ShareCard({
         />
 
         <div className="relative z-10">
-          {/* Logo */}
           <p className="text-neutral-600 text-xs font-medium tracking-widest uppercase mb-4">
             MixMaven
           </p>
 
-          {/* Title */}
           <h2 className="font-serif text-[28px] text-cream leading-tight mb-1">
             {title}
           </h2>
 
-          {/* Meta */}
           <p className="text-neutral-400 text-sm mb-5">
             by {author} · {trackCount} tracks · {duration}
           </p>
@@ -61,14 +59,29 @@ export default function ShareCard({
             {tracks.slice(0, 4).map((t, i) => (
               <div
                 key={i}
-                className="w-12 h-12 rounded-lg flex items-center justify-center text-base"
+                className="w-12 h-12 rounded-lg flex items-center justify-center text-base overflow-hidden relative"
                 style={{
                   background: `linear-gradient(135deg, ${t.gradientFrom}, ${t.gradientTo})`,
                 }}
               >
-                {t.emoji}
+                {t.albumArt ? (
+                  <Image
+                    src={t.albumArt}
+                    alt=""
+                    fill
+                    className="object-cover"
+                    sizes="48px"
+                  />
+                ) : (
+                  t.emoji
+                )}
               </div>
             ))}
+            {trackCount > 4 && (
+              <div className="w-12 h-12 rounded-lg bg-neutral-800 flex items-center justify-center text-neutral-400 text-xs font-semibold">
+                +{trackCount - 4}
+              </div>
+            )}
           </div>
 
           {/* Stats */}

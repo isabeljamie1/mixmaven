@@ -231,7 +231,7 @@ export default function MixBuilder({ mixId, initialTracks, initialTitle }: MixBu
         </div>
 
         {/* Track list */}
-        <div className="bg-card rounded-xl mx-3 overflow-hidden">
+        <div className="bg-card rounded-xl mx-3 overflow-y-auto max-h-[60vh] overscroll-contain">
           <DndContext
             sensors={sensors}
             collisionDetection={closestCenter}
