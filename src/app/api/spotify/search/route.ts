@@ -9,7 +9,7 @@ export async function GET(request: Request) {
   const query = searchParams.get('q');
   if (!query) return NextResponse.json({ error: 'Missing q parameter' }, { status: 400 });
 
-  const user = getSpotifyUserFromCookies();
+  const user = await getSpotifyUserFromCookies();
   if (!user) return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
 
   const accessToken = await getValidToken(user.id);

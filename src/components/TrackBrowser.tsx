@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
+import Image from 'next/image';
 
 interface Track {
   id: string;
@@ -65,14 +66,14 @@ export default function TrackBrowser({ onAddTrack, lastTrack }: TrackBrowserProp
     } catch {} finally { setLoading(false); }
   }, [mode, query, lastTrack]);
 
-  useEffect(() => { if (mode === 'library') fetchTracks(); }, [mode]);
+  useEffect(() => { if (mode === 'library') fetchTracks(); }, [mode, fetchTracks]);
 
   useEffect(() => {
     if (mode === 'search' && query.length > 1) {
       const t = setTimeout(fetchTracks, 400);
       return () => clearTimeout(t);
     }
-  }, [query, mode]);
+  }, [query, mode, fetchTracks]);
 
   const filtered = tracks
     .filter(t => t.bpm >= bpmRange[0] && t.bpm <= bpmRange[1])
@@ -153,7 +154,7 @@ export default function TrackBrowser({ onAddTrack, lastTrack }: TrackBrowserProp
         ) : (
           filtered.map(track => (
             <div key={track.id} className="group flex items-center gap-3 rounded-xl p-2 hover:bg-white/5 transition-colors">
-              <img src={track.artwork_url} alt="" className="h-10 w-10 rounded-lg object-cover" />
+              <Image src={track.artwork_url} alt="" width={40} height={40} className="h-10 w-10 rounded-lg object-cover" />
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-2">
                   <p className="truncate text-sm font-medium text-cream">{track.title}</p>

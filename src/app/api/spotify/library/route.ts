@@ -20,7 +20,7 @@ function enrichTracks(tracks: SpotifyTrack[], featuresMap: Map<string, AudioFeat
 }
 
 export async function GET(request: Request) {
-  const user = getSpotifyUserFromCookies();
+  const user = await getSpotifyUserFromCookies();
   if (!user) return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
 
   const accessToken = await getValidToken(user.id);

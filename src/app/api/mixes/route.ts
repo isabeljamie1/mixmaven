@@ -3,7 +3,7 @@ import { createClient } from '@/lib/supabase/server';
 import { getSpotifyUserFromCookies } from '@/lib/spotify-server';
 
 export async function GET() {
-  const user = getSpotifyUserFromCookies();
+  const user = await getSpotifyUserFromCookies();
   if (!user) return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
 
   const supabase = createClient();
@@ -18,7 +18,7 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
-  const user = getSpotifyUserFromCookies();
+  const user = await getSpotifyUserFromCookies();
   if (!user) return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
 
   const body = await request.json();

@@ -3,7 +3,7 @@ import { createClient } from '@/lib/supabase/server';
 import { getSpotifyUserFromCookies } from '@/lib/spotify-server';
 
 export async function GET(_req: Request, { params }: { params: { id: string } }) {
-  const user = getSpotifyUserFromCookies();
+  const user = await getSpotifyUserFromCookies();
   if (!user) return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
 
   const supabase = createClient();
@@ -33,7 +33,7 @@ export async function GET(_req: Request, { params }: { params: { id: string } })
 }
 
 export async function DELETE(_req: Request, { params }: { params: { id: string } }) {
-  const user = getSpotifyUserFromCookies();
+  const user = await getSpotifyUserFromCookies();
   if (!user) return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
 
   const supabase = createClient();

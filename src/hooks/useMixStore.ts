@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useCallback } from 'react';
-import { createClient } from '@/lib/supabase/client';
 import { getMixFlowScore, getTransitionScore } from '@/lib/camelot';
 import type { Mix, MixTrack, TransitionScore } from '@/lib/types';
 
