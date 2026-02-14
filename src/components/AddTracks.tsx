@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import type { TrackRowData } from './TrackRow';
 
 export interface SuggestedTrack {
@@ -27,7 +27,7 @@ interface AddTracksProps {
 
 type Tab = 'search' | 'library';
 
-export default function AddTracks({ suggestions = [], libraryTracks = [], lastTrack, onAdd }: AddTracksProps) {
+export default function AddTracks({ suggestions = [], libraryTracks = [], onAdd }: AddTracksProps) {
   const [tab, setTab] = useState<Tab>('search');
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<SuggestedTrack[]>([]);

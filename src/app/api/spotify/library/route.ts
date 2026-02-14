@@ -30,7 +30,7 @@ export async function GET(request: Request) {
   const playlistId = searchParams.get('playlist');
 
   try {
-    let allTracks: SpotifyTrack[] = [];
+    const allTracks: SpotifyTrack[] = [];
 
     if (playlistId) {
       // Fetch playlist tracks
@@ -62,7 +62,8 @@ export async function GET(request: Request) {
         'Cache-Control': 'private, max-age=300',
       },
     });
-  } catch (e: any) {
-    return NextResponse.json({ error: e.message }, { status: 500 });
+  } catch (e: unknown) {
+    const message = e instanceof Error ? e.message : 'Unknown error';
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }

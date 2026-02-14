@@ -44,7 +44,6 @@ export default function ProfilePage() {
 
     fetch('/api/mixes').then(r => r.ok ? r.json() : []).then((data: Mix[]) => {
       setMixes(data);
-      const publicMixes = data.filter(m => m.is_public);
       const scores = data.map(m => m.flow_score).filter((s): s is number => s !== null);
       setStats({
         total_mixes: data.length,

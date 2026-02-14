@@ -63,7 +63,7 @@ export default function MixCard({ mix, onClick, onDelete }: MixCardProps) {
 
         {/* Delete */}
         <button
-          onClick={e => { e.stopPropagation(); confirming ? onDelete() : setConfirming(true); }}
+          onClick={(e) => { e.stopPropagation(); if (confirming) { onDelete(); } else { setConfirming(true); } }}
           onBlur={() => setConfirming(false)}
           className="absolute right-3 top-3 rounded-lg bg-black/50 p-1.5 text-cream/30 opacity-0 group-hover:opacity-100 hover:text-red-400 transition-all"
         >

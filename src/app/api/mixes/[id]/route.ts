@@ -28,7 +28,8 @@ export async function GET(_req: Request, { params }: { params: { id: string } })
     name: mix.name,
     flowScore: mix.flow_score,
     createdAt: mix.created_at,
-    tracks: (mixTracks ?? []).map((mt: any) => mt.track_data),
+    tracks: (mixTracks ?? []).map(// eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (mt: any) => mt.track_data),
   });
 }
 

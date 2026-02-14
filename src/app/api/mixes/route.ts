@@ -45,7 +45,8 @@ export async function POST(request: Request) {
   await supabase.from('mix_tracks').delete().eq('mix_id', mix.id);
 
   if (body.tracks?.length) {
-    const mixTracks = body.tracks.map((t: any, i: number) => ({
+    const mixTracks = body.tracks.map(// eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (t: any, i: number) => ({
       mix_id: mix.id,
       track_id: t.track.id,
       position: i,

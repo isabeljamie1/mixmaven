@@ -1,12 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!,
-);
+function getSupabase() {
+  return createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+  );
+}
 
-async function refreshTokenIfNeeded(userId: string, tokens: { access_token: string; refresh_token: string; expires_at?: number }) {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+async function refreshTokenIfNeeded(userId: string, tokens: { access_token: string; refresh_token: string; expires_at?: number }, supabase: any) {
   if (tokens.expires_at && Date.now() < tokens.expires_at * 1000 - 60000) {
     return tokens.access_token;
   }
@@ -34,6 +37,8 @@ async function refreshTokenIfNeeded(userId: string, tokens: { access_token: stri
 }
 
 export async function POST(req: NextRequest) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const supabase: any = getSupabase();
   try {
     const { mixId, name } = await req.json();
     if (!mixId || !name) {
@@ -61,7 +66,7 @@ export async function POST(req: NextRequest) {
       access_token: profile.spotify_access_token,
       refresh_token: profile.spotify_refresh_token,
       expires_at: profile.spotify_expires_at,
-    });
+    }, supabase);
 
     // Get mix tracks
     const { data: mix } = await supabase
@@ -119,7 +124,8 @@ export async function POST(req: NextRequest) {
       url: playlist.external_urls?.spotify ?? `https://open.spotify.com/playlist/${playlist.id}`,
       playlistId: playlist.id,
     });
-  } catch (err: any) {
-    return NextResponse.json({ error: err.message ?? 'Internal error' }, { status: 500 });
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : 'Internal error';
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }
