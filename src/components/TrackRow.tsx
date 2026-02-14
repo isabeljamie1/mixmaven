@@ -60,7 +60,7 @@ export default function TrackRow({ track, index, onRemove }: TrackRowProps) {
     >
       {/* Drag handle */}
       <button
-        className="flex flex-col gap-[3px] cursor-grab active:cursor-grabbing p-1 touch-none"
+        className="flex flex-col gap-[3px] cursor-grab active:cursor-grabbing p-3 min-w-[44px] min-h-[44px] items-center justify-center touch-none"
         {...attributes}
         {...listeners}
       >

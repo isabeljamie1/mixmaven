@@ -1,5 +1,9 @@
 import MixBuilder from '../../../components/MixBuilder';
 
-export default function MixPage() {
-  return <MixBuilder />;
+interface MixPageProps {
+  params: { id: string };
+}
+
+export default function MixPage({ params }: MixPageProps) {
+  return <MixBuilder mixId={params.id} />;
 }

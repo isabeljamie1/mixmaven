@@ -1,11 +1,13 @@
 'use client';
 
+import Image from 'next/image';
 import { Track, useAudioPlayer } from '@/hooks/useAudioPlayer';
 import TransitionCard from './TransitionCard';
 import QueueView from './QueueView';
 
 interface NowPlayingProps {
   tracks: Track[];
+  mixName?: string;
 }
 
 function formatTime(s: number) {
@@ -14,12 +16,10 @@ function formatTime(s: number) {
   return `${m}:${sec.toString().padStart(2, '0')}`;
 }
 
-const EMOJIS = ['🎵', '💃', '🔥', '✨'];
-
-export default function NowPlaying({ tracks }: NowPlayingProps) {
+export default function NowPlaying({ tracks, mixName }: NowPlayingProps) {
   const {
-    isPlaying, currentTrackIndex, currentTime, duration,
-    play, pause, next, previous, currentTrack,
+    isPlaying, currentTrackIndex, currentTime, duration, volume,
+    play, pause, next, previous, setVolume, currentTrack, hasPreview,
   } = useAudioPlayer(tracks);
 
   if (!currentTrack) return null;
@@ -32,21 +32,42 @@ export default function NowPlaying({ tracks }: NowPlayingProps) {
       {/* Header */}
       <div className="flex items-center justify-between px-6 pt-[env(safe-area-inset-top)] py-4">
         <button className="text-cream/60 text-xl">←</button>
-        <span className="text-cream/40 text-xs font-semibold uppercase tracking-[0.2em]">Playing</span>
+        <div className="text-center">
+          <span className="text-cream/40 text-xs font-semibold uppercase tracking-[0.2em]">Playing</span>
+          {mixName && <p className="text-cream/60 text-xs mt-0.5">{mixName}</p>}
+        </div>
         <button className="text-cream/60 text-xl">↗</button>
       </div>
 
       {/* Album Art */}
       <div className="flex justify-center px-6 mt-2">
-        <div className="w-[260px] h-[260px] rounded-2xl bg-gradient-to-br from-coral/30 via-mauve/30 to-purple/30 flex items-center justify-center">
-          <span className="text-7xl">{EMOJIS[currentTrackIndex % EMOJIS.length]}</span>
-        </div>
+        {currentTrack.album_art_url ? (
+          <div className="w-[260px] h-[260px] rounded-2xl overflow-hidden relative shadow-2xl">
+            <Image
+              src={currentTrack.album_art_url}
+              alt={`${currentTrack.title} album art`}
+              fill
+              className="object-cover"
+              sizes="260px"
+              priority
+            />
+          </div>
+        ) : (
+          <div className="w-[260px] h-[260px] rounded-2xl bg-gradient-to-br from-coral/30 via-mauve/30 to-purple/30 flex items-center justify-center">
+            <span className="text-7xl">🎵</span>
+          </div>
+        )}
       </div>
 
       {/* Track Info */}
       <div className="text-center mt-8 px-6">
         <h1 className="font-serif text-cream text-2xl leading-tight">{currentTrack.title}</h1>
         <p className="text-neutral-500 text-sm mt-1">{currentTrack.artist}</p>
+        {!hasPreview && (
+          <p className="text-coral/70 text-xs mt-2 bg-coral/10 rounded-full px-3 py-1 inline-block">
+            No preview available
+          </p>
+        )}
       </div>
 
       {/* Progress Bar */}
@@ -63,11 +84,11 @@ export default function NowPlaying({ tracks }: NowPlayingProps) {
         </div>
       </div>
 
-      {/* Controls */}
-      <div className="flex items-center justify-center gap-10 mt-6">
+      {/* Controls — pushed toward bottom for thumb reach */}
+      <div className="flex items-center justify-center gap-10 mt-auto pt-6">
         <button
           onClick={previous}
-          className="text-cream/50 text-2xl hover:text-cream transition-colors"
+          className="min-w-[44px] min-h-[44px] flex items-center justify-center text-cream/50 text-2xl hover:text-cream transition-colors disabled:opacity-30"
           disabled={currentTrackIndex === 0}
         >
           ⏮
@@ -75,18 +96,36 @@ export default function NowPlaying({ tracks }: NowPlayingProps) {
 
         <button
           onClick={isPlaying ? pause : play}
-          className="w-[60px] h-[60px] rounded-full bg-coral flex items-center justify-center text-white text-2xl hover:bg-coral/90 transition-colors active:scale-95"
+          className={`w-[64px] h-[64px] rounded-full flex items-center justify-center text-white text-2xl transition-colors active:scale-95 ${
+            hasPreview ? 'bg-coral hover:bg-coral/90' : 'bg-neutral-700 cursor-not-allowed'
+          }`}
+          disabled={!hasPreview}
         >
           {isPlaying ? '⏸' : '▶'}
         </button>
 
         <button
           onClick={next}
-          className="text-cream/50 text-2xl hover:text-cream transition-colors"
+          className="min-w-[44px] min-h-[44px] flex items-center justify-center text-cream/50 text-2xl hover:text-cream transition-colors disabled:opacity-30"
           disabled={currentTrackIndex === tracks.length - 1}
         >
           ⏭
         </button>
+      </div>
+
+      {/* Volume */}
+      <div className="flex items-center gap-3 px-10 mt-4">
+        <span className="text-neutral-600 text-xs">🔈</span>
+        <input
+          type="range"
+          min={0}
+          max={1}
+          step={0.01}
+          value={volume}
+          onChange={(e) => setVolume(parseFloat(e.target.value))}
+          className="flex-1 h-1 accent-coral bg-neutral-800 rounded-full appearance-none [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-coral"
+        />
+        <span className="text-neutral-600 text-xs">🔊</span>
       </div>
 
       {/* Transition Card */}

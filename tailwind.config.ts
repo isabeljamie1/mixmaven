@@ -12,7 +12,7 @@ const config: Config = {
     extend: {
       colors: {
         golden: "#E8A854",
-        coral: "#F08A5D",
+        coral: "#FF6B35",
         rose: "#E45B6C",
         mauve: "#C664A0",
         purple: "#6B2D7B",

@@ -8,8 +8,8 @@ export interface Track {
   artist: string;
   bpm: number;
   key: string;
-  preview_url: string;
-  artwork?: string;
+  preview_url: string | null;
+  album_art_url?: string;
 }
 
 interface AudioPlayerState {
@@ -17,16 +17,18 @@ interface AudioPlayerState {
   currentTrackIndex: number;
   currentTime: number;
   duration: number;
+  volume: number;
 }
 
-const CROSSFADE_DURATION = 3; // seconds before end to start crossfade
+const CROSSFADE_DURATION = 3;
 
 export function useAudioPlayer(tracks: Track[]) {
   const [state, setState] = useState<AudioPlayerState>({
     isPlaying: false,
-    currentTrackIndex: 1, // Start on track 2 (Show Me Love)
+    currentTrackIndex: 0,
     currentTime: 0,
     duration: 30,
+    volume: 0.8,
   });
 
   const audioA = useRef<HTMLAudioElement | null>(null);
@@ -35,12 +37,13 @@ export function useAudioPlayer(tracks: Track[]) {
   const rafRef = useRef<number>(0);
   const crossfading = useRef(false);
 
-  // Initialize audio elements
   useEffect(() => {
     if (typeof window === 'undefined') return;
     audioA.current = new Audio();
     audioB.current = new Audio();
-    audioA.current.volume = 1;
+    audioA.current.crossOrigin = 'anonymous';
+    audioB.current.crossOrigin = 'anonymous';
+    audioA.current.volume = state.volume;
     audioB.current.volume = 0;
 
     return () => {
@@ -48,6 +51,7 @@ export function useAudioPlayer(tracks: Track[]) {
       audioB.current?.pause();
       cancelAnimationFrame(rafRef.current);
     };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const getActive = useCallback(() => {
@@ -58,7 +62,6 @@ export function useAudioPlayer(tracks: Track[]) {
     return activeAudio.current === 'A' ? audioB.current : audioA.current;
   }, []);
 
-  // Update time via rAF
   const tick = useCallback(() => {
     const audio = getActive();
     if (audio && !audio.paused) {
@@ -67,7 +70,6 @@ export function useAudioPlayer(tracks: Track[]) {
 
       setState(prev => ({ ...prev, currentTime, duration }));
 
-      // Crossfade logic
       const timeLeft = duration - currentTime;
       if (timeLeft <= CROSSFADE_DURATION && timeLeft > 0 && !crossfading.current) {
         const nextIdx = state.currentTrackIndex + 1;
@@ -75,28 +77,27 @@ export function useAudioPlayer(tracks: Track[]) {
           crossfading.current = true;
           const inactive = getInactive();
           if (inactive) {
-            inactive.src = tracks[nextIdx].preview_url;
+            inactive.src = tracks[nextIdx].preview_url!;
             inactive.volume = 0;
             inactive.play().catch(() => {});
           }
         }
       }
 
-      // Adjust volumes during crossfade
       if (crossfading.current) {
-        const audio = getActive();
+        const active = getActive();
         const inactive = getInactive();
-        if (audio && inactive) {
-          const timeLeft = (audio.duration || 30) - audio.currentTime;
-          const fadeProgress = Math.max(0, 1 - timeLeft / CROSSFADE_DURATION);
-          audio.volume = 1 - fadeProgress;
-          inactive.volume = fadeProgress;
+        if (active && inactive) {
+          const tl = (active.duration || 30) - active.currentTime;
+          const fadeProgress = Math.max(0, 1 - tl / CROSSFADE_DURATION);
+          active.volume = state.volume * (1 - fadeProgress);
+          inactive.volume = state.volume * fadeProgress;
         }
       }
 
       rafRef.current = requestAnimationFrame(tick);
     }
-  }, [getActive, getInactive, state.currentTrackIndex, tracks]);
+  }, [getActive, getInactive, state.currentTrackIndex, state.volume, tracks]);
 
   const loadAndPlay = useCallback((index: number) => {
     const track = tracks[index];
@@ -106,9 +107,12 @@ export function useAudioPlayer(tracks: Track[]) {
     if (!audio) return;
 
     crossfading.current = false;
-    audio.volume = 1;
-    getInactive()!.pause();
-    getInactive()!.volume = 0;
+    audio.volume = state.volume;
+    const inactive = getInactive();
+    if (inactive) {
+      inactive.pause();
+      inactive.volume = 0;
+    }
 
     if (track.preview_url) {
       audio.src = track.preview_url;
@@ -119,26 +123,24 @@ export function useAudioPlayer(tracks: Track[]) {
     } else {
       setState(prev => ({ ...prev, currentTrackIndex: index, isPlaying: false, currentTime: 0 }));
     }
-  }, [tracks, getActive, getInactive, tick]);
+  }, [tracks, getActive, getInactive, state.volume, tick]);
 
-  // Handle track end
   useEffect(() => {
     const audio = getActive();
     if (!audio) return;
 
     const onEnded = () => {
       if (crossfading.current) {
-        // Swap active audio
         activeAudio.current = activeAudio.current === 'A' ? 'B' : 'A';
         crossfading.current = false;
-        getActive()!.volume = 1;
+        const active = getActive();
+        if (active) active.volume = state.volume;
         const nextIdx = state.currentTrackIndex + 1;
         if (nextIdx < tracks.length) {
           setState(prev => ({ ...prev, currentTrackIndex: nextIdx }));
           rafRef.current = requestAnimationFrame(tick);
         }
       } else {
-        // Simple advance
         const nextIdx = state.currentTrackIndex + 1;
         if (nextIdx < tracks.length) {
           loadAndPlay(nextIdx);
@@ -150,7 +152,7 @@ export function useAudioPlayer(tracks: Track[]) {
 
     audio.addEventListener('ended', onEnded);
     return () => audio.removeEventListener('ended', onEnded);
-  }, [getActive, state.currentTrackIndex, tracks, tick, loadAndPlay]);
+  }, [getActive, state.currentTrackIndex, state.volume, tracks, tick, loadAndPlay]);
 
   const play = useCallback(() => {
     const audio = getActive();
@@ -190,6 +192,13 @@ export function useAudioPlayer(tracks: Track[]) {
     }
   }, [getActive]);
 
+  const setVolume = useCallback((vol: number) => {
+    const v = Math.max(0, Math.min(1, vol));
+    setState(prev => ({ ...prev, volume: v }));
+    const audio = getActive();
+    if (audio && !crossfading.current) audio.volume = v;
+  }, [getActive]);
+
   return {
     ...state,
     play,
@@ -197,6 +206,8 @@ export function useAudioPlayer(tracks: Track[]) {
     next,
     previous,
     seekTo,
+    setVolume,
     currentTrack: tracks[state.currentTrackIndex] || null,
+    hasPreview: !!(tracks[state.currentTrackIndex]?.preview_url),
   };
 }
