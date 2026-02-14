@@ -12,7 +12,7 @@ interface ShareScreenProps {
   slug: string;
   trackCount: number;
   duration: string;
-  tracks: { emoji: string; gradientFrom: string; gradientTo: string }[];
+  tracks: { emoji: string; gradientFrom: string; gradientTo: string; albumArt?: string }[];
   flowScore: number;
   avgBpm: number;
   smoothTransitions: string;
@@ -54,7 +54,6 @@ export default function ShareScreen({
   return (
     <div className="min-h-screen bg-bg pb-24">
       <div className="max-w-[430px] mx-auto px-4">
-        {/* Header */}
         <header className="flex items-center gap-3 py-4">
           <button onClick={onBack} className="text-cream text-xl p-1">
             ←
@@ -64,7 +63,6 @@ export default function ShareScreen({
           </h1>
         </header>
 
-        {/* Share Card */}
         <ShareCard
           title={mixTitle}
           author={author}
@@ -76,7 +74,6 @@ export default function ShareScreen({
           smoothTransitions={smoothTransitions}
         />
 
-        {/* Share CTA */}
         <div className="mt-8 mb-6">
           <h3 className="text-cream text-lg font-semibold">Share Your Mix</h3>
           <p className="text-neutral-400 text-sm mt-1">
@@ -84,7 +81,6 @@ export default function ShareScreen({
           </p>
         </div>
 
-        {/* Share Buttons */}
         <div className="flex flex-col gap-3">
           <button
             onClick={handleShareLink}
@@ -111,7 +107,7 @@ export default function ShareScreen({
           >
             <span>{copied ? '✅ Copied!' : '🔗 Copy Link'}</span>
             <span className="text-[11px] text-neutral-600 font-normal">
-              mixmaven.io/{username[0]}/{slug}
+              {shareUrl}
             </span>
           </button>
         </div>

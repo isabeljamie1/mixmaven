@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useCallback, useRef } from 'react';
-import type { MixTrack, SpotifyTrack, AudioFeatures } from '@/lib/types';
+import type { MixTrack } from '@/lib/types';
 
 interface UseSpotifyDataReturn {
   tracks: MixTrack[];
@@ -29,8 +29,8 @@ export function useSpotifyData(): UseSpotifyDataReturn {
       if (!res.ok) throw new Error(`Failed to fetch library: ${res.status}`);
       const data: MixTrack[] = await res.json();
       setTracks(data);
-    } catch (e: any) {
-      if (e.name !== 'AbortError') setError(e.message);
+    } catch (e: unknown) {
+      if (e instanceof Error && e.name !== 'AbortError') setError(e.message);
     } finally {
       setIsLoading(false);
     }
@@ -55,8 +55,8 @@ export function useSpotifyData(): UseSpotifyDataReturn {
       if (!res.ok) throw new Error(`Search failed: ${res.status}`);
       const data: MixTrack[] = await res.json();
       setSearchResults(data);
-    } catch (e: any) {
-      if (e.name !== 'AbortError') setError(e.message);
+    } catch (e: unknown) {
+      if (e instanceof Error && e.name !== 'AbortError') setError(e.message);
     } finally {
       setIsLoading(false);
     }
@@ -69,8 +69,8 @@ export function useSpotifyData(): UseSpotifyDataReturn {
       const res = await fetch(`/api/spotify/library?playlist=${encodeURIComponent(playlistId)}`);
       if (!res.ok) throw new Error(`Failed to fetch playlist: ${res.status}`);
       return await res.json();
-    } catch (e: any) {
-      setError(e.message);
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : 'Unknown error');
       return [];
     } finally {
       setIsLoading(false);

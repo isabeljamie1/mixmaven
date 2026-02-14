@@ -66,9 +66,9 @@ export async function getValidToken(spotifyId: string): Promise<string | null> {
 }
 
 /** Read spotify_user cookie and return the parsed value */
-export function getSpotifyUserFromCookies(): { id: string; name: string } | null {
-  const { cookies } = require('next/headers');
-  const cookieStore = cookies();
+export async function getSpotifyUserFromCookies(): Promise<{ id: string; name: string } | null> {
+  const { cookies } = await import('next/headers');
+  const cookieStore = await cookies();
   const raw = cookieStore.get('spotify_user')?.value;
   if (!raw) return null;
   try {

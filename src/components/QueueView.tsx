@@ -1,13 +1,12 @@
 'use client';
 
+import Image from 'next/image';
 import { Track } from '@/hooks/useAudioPlayer';
 
 interface QueueViewProps {
   tracks: Track[];
   currentTrackIndex: number;
 }
-
-const EMOJIS = ['🎵', '💃', '🔥', '✨'];
 
 export default function QueueView({ tracks, currentTrackIndex }: QueueViewProps) {
   return (
@@ -17,6 +16,7 @@ export default function QueueView({ tracks, currentTrackIndex }: QueueViewProps)
         {tracks.map((track, i) => {
           const isPlayed = i < currentTrackIndex;
           const isCurrent = i === currentTrackIndex;
+          const noPreview = !track.preview_url;
 
           return (
             <div
@@ -31,10 +31,24 @@ export default function QueueView({ tracks, currentTrackIndex }: QueueViewProps)
                 {i + 1}
               </span>
 
-              <div className={`w-9 h-9 rounded-lg flex items-center justify-center text-sm ${
-                isPlayed ? 'bg-neutral-800' : 'bg-card'
+              <div className={`w-9 h-9 rounded-lg overflow-hidden relative flex-shrink-0 ${
+                isPlayed ? 'opacity-50' : ''
               }`}>
-                {EMOJIS[i % EMOJIS.length]}
+                {track.album_art_url ? (
+                  <Image
+                    src={track.album_art_url}
+                    alt=""
+                    fill
+                    className="object-cover"
+                    sizes="36px"
+                  />
+                ) : (
+                  <div className={`w-full h-full flex items-center justify-center text-sm ${
+                    isPlayed ? 'bg-neutral-800' : 'bg-card'
+                  }`}>
+                    🎵
+                  </div>
+                )}
               </div>
 
               <div className="flex-1 min-w-0">
@@ -43,6 +57,7 @@ export default function QueueView({ tracks, currentTrackIndex }: QueueViewProps)
                   isCurrent ? 'text-coral font-medium' : 'text-cream'
                 }`}>
                   {track.title}
+                  {noPreview && <span className="text-neutral-600 text-[10px] ml-1">(no preview)</span>}
                 </p>
                 <p className={`text-xs truncate ${
                   isPlayed ? 'text-neutral-700' : 'text-neutral-500'
